@@ -4,7 +4,7 @@
 #include<sys/time.h>
 #include<immintrin.h>
 using namespace std;
-const int maxN = 30000;//采用位图存储,消元子和消元行的个数
+const int maxN = 30000;//采用位图存储,消元子和消元行的个数之和
 const int maxM = 23500;//矩阵列数
 int R[maxN][maxM / 32 + 1];//消元子
 int E[maxN][maxM / 32 + 1];//被消元行
@@ -23,7 +23,7 @@ int getBit(int& a, int pos)
 	return (a >> pos) & 1;
 }
 void RInput()
-{
+{//读入消元子
 	ifstream infile("消元子.txt");
 	int temp;
 	bool newLine = true;
@@ -51,7 +51,7 @@ void RInput()
 	infile.close();
 }
 void EInput()
-{
+{//读入被消元行
 	int temp;
 	bool newLine = true;
 	ifstream infile("被消元行.txt");
@@ -165,7 +165,7 @@ void ParallelEliminate()
 	}
 }
 void Output()
-{
+{//将结果输出到result.txt中
 	ofstream outfile("result.txt");
 	outfile << "************被消元行*************" << endl;
 	for (int i = 0; i < sumEtemp; i++)
