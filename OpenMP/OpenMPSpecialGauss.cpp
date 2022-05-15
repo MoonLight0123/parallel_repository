@@ -335,10 +335,12 @@ void OpenMPAlgorithm()
 			{
 #pragma omp barrier
 #pragma omp single
-				Rpos[Epos[i]] = sumR;
-				memcpy(R[sumR], E[i], sizeof(R[sumR]));//E[i]升级为消元子
-				sumR++; sumE--;
-				break;
+				{
+					Rpos[Epos[i]] = sumR;
+					memcpy(R[sumR], E[i], sizeof(R[sumR]));//E[i]升级为消元子
+					sumR++; sumE--;
+					break;
+				}
 			}
 		}
 	}
