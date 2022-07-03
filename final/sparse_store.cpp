@@ -5,8 +5,8 @@
 #include <time.h>
 #include <windows.h>
 using namespace std;
-const int maxN = 1000;//最大消元子被消元子个数
-const int maxM = 1500;//向量的最大长度
+const int maxN = 30000;//最大消元子被消元子个数
+const int maxM = 8000;//向量的最大长度
 int E[maxN][maxM], R[maxN][maxM];
 int eLen[maxN], rLen[maxN];//E[i]代表E第i行的元素数量,例：E[i]这一行仅E[i][0]有元素，eLen[i]=1;
 int rPos[maxN];//rPos[i]表示首项为i的消元行在R中第rPos行
@@ -98,6 +98,8 @@ void eliminate()
 		int eTemp[maxM] = { 0 }, eNew[maxM] = { 0 };//本轮消去中用来取代旧的被消元行
 		memcpy(eTemp, E[i], eLen[i] * sizeof(int));
 		int len = eLen[i], k;
+		if (i == 4)
+			int m = 0;
 		while (len && rPos[eTemp[0]] != -1)
 		{
 			k = 1, len = 0;
@@ -117,12 +119,15 @@ void eliminate()
 			eLen[i] = len;
 			
 		}
-		memset(E[i], 0, eLen[i] * sizeof(int));
-		eLen[i] = rLen[rNumNow] = len;
-		memcpy(E[i], eNew, len * sizeof(int));
-		rPos[E[i][0]] = rNumNow;
-		memcpy(R[rNumNow], E[i], len * sizeof(int));
-		rNumNow++; eNumNow--;
+		if (len != 0)//空行跳过
+		{
+			memset(E[i], 0, eLen[i] * sizeof(int));
+			eLen[i] = rLen[rNumNow] = len;
+			memcpy(E[i], eNew, len * sizeof(int));
+			rPos[E[i][0]] = rNumNow;
+			memcpy(R[rNumNow], E[i], len * sizeof(int));
+			rNumNow++; eNumNow--;
+		}
 	}
 }
 int main()

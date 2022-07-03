@@ -134,9 +134,12 @@ void eliminate()
 			ePos[i] = newEpos;
 			if (newEpos == -1)break;//该行消为空行
 		}
-		rPos[ePos[i]] = rNumNow;
-		memcpy(R[rNumNow], E[i], sizeof(R[rNumNow]));//E[i]升级为消元子
-		rNumNow++; eNumNow--;
+		if (ePos[i] != -1)
+		{
+			rPos[ePos[i]] = rNumNow;//当空行时，该语句为rPos[-1]=rNumNow，需要跳过
+			memcpy(R[rNumNow], E[i], sizeof(R[rNumNow]));//E[i]升级为消元子
+			rNumNow++; eNumNow--;
+		}
 	}
 }
 void* pthreadFunction(void* param)
@@ -231,8 +234,8 @@ void pthreadEliminateImproved()
 int main()
 {
 	input();
-	pthreadEliminateImproved();
-	//eliminate();
+	//pthreadEliminateImproved();
+	eliminate();
 	output();
 	return 0;
 }
