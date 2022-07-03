@@ -98,8 +98,6 @@ void eliminate()
 		int eTemp[maxM] = { 0 }, eNew[maxM] = { 0 };//本轮消去中用来取代旧的被消元行
 		memcpy(eTemp, E[i], eLen[i] * sizeof(int));
 		int len = eLen[i], k;
-		if (i == 4)
-			int m = 0;
 		while (len && rPos[eTemp[0]] != -1)
 		{
 			k = 1, len = 0;

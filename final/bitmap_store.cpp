@@ -5,6 +5,8 @@
 #include<semaphore.h>
 #include<algorithm>
 #include<math.h>
+#include <time.h>
+#include <windows.h>
 #pragma comment(lib, "pthreadVC2.lib")
 using namespace std;
 struct threadParam
@@ -25,6 +27,24 @@ threadParam tp[threadCount];
 int turn;//所有线程当前消去的轮次
 int s, e;//消去过程的起点终点
 int finish;//记录完成情况
+int gettimeofday(struct timeval *tp, void *tzp)
+{
+	time_t clock;
+	struct tm tm;
+	SYSTEMTIME wtm;
+	GetLocalTime(&wtm);
+	tm.tm_year = wtm.wYear - 1900;
+	tm.tm_mon = wtm.wMonth - 1;
+	tm.tm_mday = wtm.wDay;
+	tm.tm_hour = wtm.wHour;
+	tm.tm_min = wtm.wMinute;
+	tm.tm_sec = wtm.wSecond;
+	tm.tm_isdst = -1;
+	clock = mktime(&tm);
+	tp->tv_sec = clock;
+	tp->tv_usec = wtm.wMilliseconds * 1000;
+	return 0;
+}
 inline void setBit(int& a, int pos, int flag)//置位为flag
 {
 	if (flag)
@@ -87,6 +107,7 @@ void input()
 	}
 	eNumOrigin = eNumNow;
 	infil.close();
+	//rPos[-1] = -1;
 }
 void output()
 {
@@ -233,9 +254,30 @@ void pthreadEliminateImproved()
 }
 int main()
 {
+	timeval *tart = new timeval();
+	timeval *top = new timeval();
+	double urationTime = 0.0;
+
+	timeval *start = new timeval();
+	timeval *stop = new timeval();
+	double durationTime = 0.0;
+
+	gettimeofday(start, NULL);
 	input();
-	//pthreadEliminateImproved();
+	gettimeofday(tart, NULL);
 	eliminate();
+	//pthreadEliminateImproved();
+	gettimeofday(top, NULL);
+	gettimeofday(stop, NULL);
 	output();
+	//gettimeofday(stop, NULL);
+
+	urationTime = top->tv_sec * 1000 + double(top->tv_usec) / 1000 - tart->tv_sec * 1000 - double(tart->tv_usec) / 1000;
+
+	durationTime = stop->tv_sec * 1000 + double(stop->tv_usec) / 1000 - start->tv_sec * 1000 - double(start->tv_usec) / 1000;
+	cout << " all time: " << double(durationTime) << " ms" << endl;
+	cout << " algorithm time: " << double(urationTime) << " ms" << endl;
+	cout << " io time: " << double(durationTime - urationTime) << " ms" << endl;
+
 	return 0;
 }
