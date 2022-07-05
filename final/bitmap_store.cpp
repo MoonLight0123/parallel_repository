@@ -7,14 +7,15 @@
 #include<math.h>
 #include <time.h>
 #include <windows.h>
+#include<immintrin.h>
 #pragma comment(lib, "pthreadVC2.lib")
 using namespace std;
 struct threadParam
 {
 	int threadID, threadPos;
 };
-const int maxN = 10000;//采用位图存储,消元子和消元行的个数之和
-const int maxM = 10000;//矩阵列数
+const int maxN = 7000;//采用位图存储,消元子和消元行的个数之和
+const int maxM = 90000;//矩阵列数
 int R[maxN][maxM / 32 + 1];//消元子
 int E[maxN][maxM / 32 + 1];//被消元行
 int rPos[maxM];//rPos[i]表示首项为i的消元行在R中第rPos行
@@ -150,6 +151,52 @@ void eliminate()
 							newEpos = 32 * j + k;
 							break;
 						}
+				}
+			}
+			ePos[i] = newEpos;
+			if (newEpos == -1)break;//该行消为空行
+		}
+		if (ePos[i] != -1)
+		{
+			rPos[ePos[i]] = rNumNow;//当空行时，该语句为rPos[-1]=rNumNow，需要跳过
+			memcpy(R[rNumNow], E[i], sizeof(R[rNumNow]));//E[i]升级为消元子
+			rNumNow++; eNumNow--;
+		}
+	}
+}
+void SSEeliminate()
+{
+	__m128i t0, t1, t3;
+	for (int i = 0; i < eNumOrigin; i++)
+	{
+		while (rPos[ePos[i]] != -1)
+		{
+			int d = ePos[i] / 32, newEpos = -1;
+			d += (4 - d % 4);//d设置为4倍数，防止越界
+			for (int j = d - 4; j >= 0; j -= 4)
+			{ 
+				t0 = _mm_loadu_si128((__m128i*)(E[i] + j));
+				t1 = _mm_loadu_si128((__m128i*)(R[rPos[ePos[i]]] + j));
+				t1 = _mm_xor_si128(t0, t1);
+				_mm_storeu_si128((__m128i*)(E[i] + j), t1);
+				if (newEpos == -1 && E[i][j] != 0)//更新Epos[i]
+				{//未更新的条件为被消元行消为0
+					t0 = _mm_xor_si128(t0, t0);
+					t3 = _mm_cmpeq_epi16(t1, t0);//判断是否全部消为零
+					int eq[4];
+					_mm_storeu_si128((__m128i*)(eq), t3);
+					for (int m = 3; m >= 0; m--)
+					{
+						if (eq[m] != -1 && newEpos == -1)
+						{
+							for (int k = 31; k >= 0; k--)
+								if (getBit(E[i][j + m], k))
+								{
+									newEpos = 32 * (j + m) + k;
+									break;
+								}
+						}
+					}
 				}
 			}
 			ePos[i] = newEpos;
